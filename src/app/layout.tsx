@@ -41,7 +41,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
       className={`${bodoni.variable} ${jost.variable} antialiased`}
     >
-      <body className="flex min-h-dvh flex-col">
+      {/* suppressHydrationWarning is needed on <body> as well as <html>: the
+          Grammarly extension stamps data-gr-ext-installed and
+          data-new-gr-c-s-check-loaded onto <body> before React hydrates, and
+          the server cannot possibly render attributes it never sent. This only
+          silences the attribute diff on these two elements - it does not
+          suppress anything inside them. */}
+      <body suppressHydrationWarning className="flex min-h-dvh flex-col">
         <Providers>
           <a
             href="#main"
