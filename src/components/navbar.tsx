@@ -26,6 +26,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -114,28 +115,34 @@ export function Navbar() {
                     referrerPolicy="no-referrer"
                     alt=""
                   />
-                  <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                  <AvatarFallback className="text-xs">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="flex flex-col gap-0.5">
-                  <span className="truncate font-medium text-foreground">
-                    {user.name}
-                  </span>
-                  <span className="truncate text-xs font-normal">
-                    {user.email}
-                  </span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {accountLinks.map((item) => (
-                  <DropdownMenuItem
-                    key={item.href}
-                    render={<Link href={item.href} />}
-                  >
-                    <item.icon />
-                    {item.label}
-                  </DropdownMenuItem>
-                ))}
+                {/* Base UI's group label may only be rendered inside a group,
+                    so the identity block and the account links share one. */}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="flex flex-col gap-0.5">
+                    <span className="truncate font-medium text-foreground">
+                      {user.name}
+                    </span>
+                    <span className="truncate text-xs font-normal">
+                      {user.email}
+                    </span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {accountLinks.map((item) => (
+                    <DropdownMenuItem
+                      key={item.href}
+                      render={<Link href={item.href} />}
+                    >
+                      <item.icon />
+                      {item.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
                   <LogOutIcon />
@@ -206,7 +213,9 @@ export function Navbar() {
                 {user ? (
                   <>
                     <div className="px-3 pb-3">
-                      <p className="truncate text-sm font-medium">{user.name}</p>
+                      <p className="truncate text-sm font-medium">
+                        {user.name}
+                      </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {user.email}
                       </p>
