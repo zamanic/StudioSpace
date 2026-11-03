@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { authClient } from "@/lib/auth-client";
+import { authClient, isSocialProviderEnabled } from "@/lib/auth-client";
 
-const googleEnabled = process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED === "true";
-const githubEnabled = process.env.NEXT_PUBLIC_AUTH_GITHUB_ENABLED === "true";
+// Mirrors what the server actually registered, so a missing provider never
+// renders a button that would 404.
+const googleEnabled = isSocialProviderEnabled("google");
+const githubEnabled = isSocialProviderEnabled("github");
 
 function GoogleMark() {
   return (
@@ -54,6 +56,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  // OAuth hands the browser off to the provider, so without this the button
+  // stays live and a second click could start a second handshake.
+  const [socialPending, setSocialPending] = useState<
+    "google" | "github" | null
+  >(null);
 
   const { data: session } = authClient.useSession();
 
@@ -119,14 +126,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   };
 
   const handleSocial = async (provider: "google" | "github") => {
+    setSocialPending(provider);
     try {
       await authClient.signIn.social({ provider, callbackURL: redirectTo });
     } catch {
+      setSocialPending(null);
       toast.error("Could not start that sign-in. Please try again.");
     }
   };
 
-  const showSocial = googleEnabled || (isRegister && githubEnabled);
+  const showSocial = googleEnabled || githubEnabled;
 
   return (
     <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
@@ -211,7 +220,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                 autoComplete={isRegister ? "new-password" : "current-password"}
                 value={form.password}
                 aria-invalid={Boolean(errors.password)}
-                placeholder={isRegister ? "At least 6 characters" : "Your password"}
+                placeholder={
+                  isRegister ? "At least 6 characters" : "Your password"
+                }
                 onChange={(event) => set("password", event.target.value)}
               />
             </div>
@@ -249,21 +260,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                     variant="outline"
                     size="lg"
                     className="h-11 w-full"
+                    disabled={socialPending !== null}
                     onClick={() => handleSocial("google")}
                   >
-                    <GoogleMark />
+                    {socialPending === "google" ? <Spinner /> : <GoogleMark />}
                     Continue with Google
                   </Button>
                 ) : null}
-                {isRegister && githubEnabled ? (
+                {githubEnabled ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="lg"
                     className="h-11 w-full"
+                    disabled={socialPending !== null}
                     onClick={() => handleSocial("github")}
                   >
-                    <GitHubMark />
+                    {socialPending === "github" ? <Spinner /> : <GitHubMark />}
                     Continue with GitHub
                   </Button>
                 ) : null}
