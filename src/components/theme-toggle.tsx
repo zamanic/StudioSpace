@@ -1,0 +1,39 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { MoonIcon, SunIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+
+/**
+ * Light / dark switch. The icon is only rendered after mount so the server
+ * markup and the first client render always agree.
+ */
+export function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const isDark = resolvedTheme === "dark";
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+    >
+      {mounted ? (
+        isDark ? (
+          <SunIcon />
+        ) : (
+          <MoonIcon />
+        )
+      ) : (
+        <span className="size-4" />
+      )}
+    </Button>
+  );
+}
