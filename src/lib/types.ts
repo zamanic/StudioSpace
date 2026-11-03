@@ -1,0 +1,210 @@
+/**
+ * The document shapes come straight from the official seed JSON in the
+ * assignment root folder (studios.json / bookings.json). The Express server
+ * stores exactly this shape, so this file is the single source of truth for
+ * both the form payloads and the UI.
+ */
+
+export const CATEGORIES = [
+  "Photo Studio",
+  "Film Stage",
+  "Podcast Lounge",
+  "Music Suite",
+  "Workshop",
+] as const;
+
+export type Category = (typeof CATEGORIES)[number];
+
+export const BOOKING_STATUSES = [
+  "Pending",
+  "Confirmed",
+  "Completed",
+  "Cancelled",
+] as const;
+
+export type BookingStatus = (typeof BOOKING_STATUSES)[number];
+
+export type StudioImage = {
+  url: string;
+  caption?: string;
+  isPrimary?: boolean;
+};
+
+export type StudioLocation = {
+  address: string;
+  city: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  coordinates?: { lat: number; lng: number };
+};
+
+export type StudioPricing = {
+  hourlyRate: number;
+  dailyRate?: number;
+  securityDeposit: number;
+  cleaningFee?: number;
+  minimumHours?: number;
+  currency?: string;
+};
+
+export type StudioSpecs = {
+  squareFeet?: number;
+  ceilingHeightFt?: number;
+  maxCapacity: number;
+  powerCapacity?: string;
+  soundproofRating?: string;
+};
+
+export type StudioHost = {
+  hostId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  isSuperhost?: boolean;
+  responseRatePercent?: number;
+  responseTime?: string;
+};
+
+export type Studio = {
+  _id: string;
+  title: string;
+  slug?: string;
+  category: Category | string;
+  tagline?: string;
+  description: string;
+  location: StudioLocation;
+  pricing: StudioPricing;
+  specs: StudioSpecs;
+  images: StudioImage[];
+  amenities: string[];
+  includedGear?: string[];
+  host: StudioHost;
+  rules?: string[];
+  rating?: number;
+  reviewCount?: number;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+/** What the add/edit form actually sends. */
+export type StudioPayload = {
+  title: string;
+  category: string;
+  tagline: string;
+  description: string;
+  location: {
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  pricing: {
+    hourlyRate: number;
+    dailyRate: number;
+    securityDeposit: number;
+    cleaningFee: number;
+    minimumHours: number;
+  };
+  specs: {
+    squareFeet: number;
+    ceilingHeightFt: number;
+    maxCapacity: number;
+    powerCapacity: string;
+    soundproofRating: string;
+  };
+  images: StudioImage[];
+  amenities: string[];
+  includedGear: string[];
+  rules: string[];
+};
+
+export type BookingCreator = {
+  userId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  company?: string;
+};
+
+export type Booking = {
+  _id: string;
+  bookingNumber: string;
+  studioId: string;
+  studioTitle: string;
+  studioCategory: string;
+  studioImage: string;
+  creator: BookingCreator;
+  hostEmail: string;
+  schedule: {
+    bookingDate: string;
+    startTime: string;
+    endTime: string;
+    totalHours: number;
+    timezone?: string;
+  };
+  pricingSummary: {
+    hourlyRate: number;
+    subtotal: number;
+    securityDeposit: number;
+    cleaningFee: number;
+    platformFee: number;
+    totalAmount: number;
+    currency?: string;
+  };
+  projectDetails: {
+    projectTitle: string;
+    crewSize: number;
+    specialRequirements?: string;
+  };
+  status: BookingStatus;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type BookingPayload = {
+  studioId: string;
+  studioTitle: string;
+  studioCategory: string;
+  studioImage: string;
+  schedule: {
+    bookingDate: string;
+    startTime: string;
+    endTime: string;
+    timezone: string;
+  };
+  projectDetails: {
+    projectTitle: string;
+    crewSize: number;
+    specialRequirements: string;
+  };
+  pricingSummary: {
+    hourlyRate: number;
+    subtotal: number;
+    securityDeposit: number;
+    cleaningFee: number;
+    platformFee: number;
+    totalAmount: number;
+  };
+};
+
+export type CatalogueStats = {
+  byCategory: { category: string; count: number }[];
+  pricing: {
+    averageHourlyRate: number;
+    cheapest: number;
+    priciest: number;
+    listings: number;
+  };
+};
+
+export type AvailabilitySlot = {
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+};
