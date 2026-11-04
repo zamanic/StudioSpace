@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { ApertureIcon } from "lucide-react";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -66,8 +67,9 @@ export function HeroCarousel() {
                   className={`object-cover ${index === 0 ? "animate-settle" : ""}`}
                 />
                 {/* Scrim sits only where text lives - the lower half of the
-                    photograph stays untouched. */}
-                <div className="absolute inset-x-0 top-0 h-[62%] bg-gradient-to-b from-black/55 via-black/25 to-transparent" />
+                    photograph stays untouched, but the top is dark enough that
+                    white type holds contrast on every slide. */}
+                <div className="absolute inset-x-0 top-0 h-[72%] bg-gradient-to-b from-black/75 via-black/35 to-transparent" />
                 <p className="absolute right-5 bottom-6 text-[0.7rem] tracking-[0.18em] text-white/70 uppercase sm:right-8">
                   {slide.caption}
                 </p>
@@ -80,7 +82,12 @@ export function HeroCarousel() {
       {/* Static overlay: the type never moves, the photographs do. */}
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col px-5 pt-[16svh] sm:px-8">
-          <h1 className="rise display max-w-[16ch] text-[clamp(2.75rem,7.6vw,6.5rem)] text-white">
+          <span className="rise inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[0.62rem] font-medium tracking-[0.22em] text-white uppercase backdrop-blur-md">
+            <ApertureIcon className="size-3.5" />
+            Next-Gen Creative Studios
+          </span>
+
+          <h1 className="rise-2 display mt-6 max-w-[16ch] text-[clamp(2.75rem,7.6vw,6.5rem)] text-white">
             Find the room
             <br />
             the work deserves
@@ -88,7 +95,7 @@ export function HeroCarousel() {
 
           {/* The sentence breaks at the horizon so the photograph shows
               through the gap between the two halves. */}
-          <p className="rise-2 mt-8 hidden max-w-[1300px] grid-cols-12 gap-0 text-[1.05rem] leading-relaxed text-white/85 lg:grid">
+          <p className="rise-3 mt-8 hidden max-w-[1300px] grid-cols-12 gap-0 text-[1.05rem] leading-relaxed text-white/85 lg:grid">
             <span className="col-span-5 text-right">
               Photo studios, sound stages and podcast rooms,
             </span>
@@ -97,7 +104,7 @@ export function HeroCarousel() {
               each one listed by the person who built it.
             </span>
           </p>
-          <p className="rise-2 mt-6 max-w-[36ch] text-[1.05rem] leading-relaxed text-white/85 lg:hidden">
+          <p className="rise-3 mt-6 max-w-[36ch] text-[1.05rem] leading-relaxed text-white/85 lg:hidden">
             Photo studios, sound stages and podcast rooms, each one listed by
             the person who built it.
           </p>

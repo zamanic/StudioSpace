@@ -1,6 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPinIcon, StarIcon, UsersIcon } from "lucide-react";
+import {
+  BadgeDollarSignIcon,
+  MapPinIcon,
+  StarIcon,
+  UsersIcon,
+} from "lucide-react";
 
 import { currency, excerpt, imageProps, primaryImage } from "@/lib/format";
 import type { Studio } from "@/lib/types";
@@ -28,6 +33,10 @@ export function StudioCard({ studio }: { studio: Studio }) {
           className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
         />
 
+        <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-black/65 px-2.5 py-1 text-[0.62rem] font-medium tracking-[0.12em] text-white uppercase backdrop-blur-sm">
+          {studio.category}
+        </span>
+
         {rating > 0 ? (
           <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/65 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
             <StarIcon className="size-3.5 fill-current text-amber-400" />
@@ -40,10 +49,6 @@ export function StudioCard({ studio }: { studio: Studio }) {
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="text-[0.68rem] font-medium tracking-[0.18em] text-muted-foreground uppercase">
-          {studio.category}
-        </p>
-
         <h3 className="font-heading text-xl leading-snug">
           <Link
             href={`/studios/${studio._id}`}
@@ -65,6 +70,10 @@ export function StudioCard({ studio }: { studio: Studio }) {
           <span className="inline-flex items-center gap-1.5">
             <UsersIcon className="size-3.5" />
             Up to {studio.specs?.maxCapacity}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <BadgeDollarSignIcon className="size-3.5" />
+            Deposit: {currency(studio.pricing?.securityDeposit)}
           </span>
         </div>
 

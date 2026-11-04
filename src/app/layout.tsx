@@ -39,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${bodoni.variable} ${jost.variable} antialiased`}
     >
       {/* suppressHydrationWarning is needed on <body> as well as <html>: the

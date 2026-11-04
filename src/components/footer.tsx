@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BadgeCheckIcon, HandshakeIcon, ShieldCheckIcon } from "lucide-react";
 
 import { NewsletterForm } from "@/components/newsletter-form";
 import { CATEGORIES } from "@/lib/types";
@@ -9,6 +10,24 @@ const quickLinks = [
   { href: "/my-bookings", label: "My Bookings" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/about", label: "About Us" },
+];
+
+const trustBar = [
+  {
+    icon: ShieldCheckIcon,
+    title: "Host Guarantee",
+    body: "Liability cover on every confirmed booking.",
+  },
+  {
+    icon: BadgeCheckIcon,
+    title: "Verified Workspaces",
+    body: "Real spaces, listed only by the host who owns them.",
+  },
+  {
+    icon: HandshakeIcon,
+    title: "Creator First",
+    body: "Pending bookings stay yours to cancel, free.",
+  },
 ];
 
 function XLogo({ className }: { className?: string }) {
@@ -41,9 +60,43 @@ function InstagramLogo({ className }: { className?: string }) {
   );
 }
 
+function YouTubeLogo({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.25 5 12 5 12 5s-6.25 0-7.82.42A2.5 2.5 0 0 0 2.42 7.2 26.2 26.2 0 0 0 2 12a26.2 26.2 0 0 0 .42 4.81 2.5 2.5 0 0 0 1.76 1.77C5.75 19 12 19 12 19s6.25 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77A26.2 26.2 0 0 0 22 12a26.2 26.2 0 0 0-.42-4.81ZM10 15.02V8.98L15.2 12 10 15.02Z" />
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
     <footer className="border-t border-border bg-card">
+      {/* Platform guarantees, stated once before the link columns. */}
+      <div className="border-b border-border">
+        <ul className="mx-auto grid w-full max-w-[1400px] gap-6 px-5 py-8 sm:grid-cols-3 sm:px-8">
+          {trustBar.map((item) => (
+            <li key={item.title} className="flex items-start gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-brand/10 text-brand">
+                <item.icon className="size-[1.05rem]" />
+              </span>
+              <div>
+                <p className="font-heading text-base leading-snug">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {item.body}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div className="mx-auto w-full max-w-[1400px] px-5 py-16 sm:px-8 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr]">
           <div>
@@ -58,7 +111,7 @@ export function Footer() {
 
             <div className="mt-8">
               <p className="text-[0.7rem] font-medium tracking-[0.18em] text-muted-foreground uppercase">
-                New rooms, once a month
+                Join our creator newsletter
               </p>
               <div className="mt-3">
                 <NewsletterForm />
@@ -132,6 +185,15 @@ export function Footer() {
               className="rounded-full border border-border p-2 text-foreground transition-colors hover:bg-muted"
             >
               <InstagramLogo className="size-4" />
+            </a>
+            <a
+              href="https://youtube.com"
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label="StudioSpace on YouTube"
+              className="rounded-full border border-border p-2 text-foreground transition-colors hover:bg-muted"
+            >
+              <YouTubeLogo className="size-4" />
             </a>
           </div>
         </div>

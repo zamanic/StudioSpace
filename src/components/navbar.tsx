@@ -5,7 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "cn";
 import {
+  ApertureIcon,
   CalendarCheckIcon,
+  ChevronDownIcon,
   HomeIcon,
   LayoutGridIcon,
   LogOutIcon,
@@ -34,11 +36,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+/**
+ * "How It Works" and "About Us" land on the matching home-page sections
+ * (`#how-it-works`, `#about`) so the nav jumps straight to the explanation,
+ * per the difference spec. The fuller `/how-it-works` and `/about` routes stay
+ * reachable from the footer and from the section CTAs.
+ */
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/studios", label: "Explore Studios" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/about", label: "About Us" },
+  { href: "/", label: "Home", path: "/" },
+  { href: "/studios", label: "Explore Studios", path: "/studios" },
+  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/#about", label: "About Us" },
 ];
 
 const accountLinks = [
@@ -48,6 +56,45 @@ const accountLinks = [
   { href: "/my-bookings", label: "My Bookings", icon: CalendarCheckIcon },
 ];
 
+/**
+ * Jumps to the section a "#hash" nav link points at and draws a one-shot ring
+ * on it.
+ *
+ * Two behaviours are handled by hand rather than left to the browser:
+ * 1. The router updates the URL with pushState, which never recomputes `:target`,
+ *    so the highlight class is applied manually once the target has mounted.
+ * 2. Next's own hash scroll runs before the Suspense-wrapped grid above the
+ *    section has settled, which leaves the page a few hundred pixels short on a
+ *    cross-route jump. Re-scrolling to the element once the layout has settled
+ *    makes the landing position identical from every route.
+ */
+function flashSection(href: string) {
+  const id = href.split("#")[1];
+  if (!id) return;
+
+  let attempts = 0;
+  const reveal = () => {
+    const section = document.getElementById(id);
+    if (!section) {
+      if (attempts++ < 25) window.setTimeout(reveal, 60);
+      return;
+    }
+
+    const settle = () =>
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    settle();
+    window.setTimeout(settle, 450);
+
+    section.classList.remove("section-flash");
+    void section.offsetWidth; // restart the animation on a repeat click
+    section.classList.add("section-flash");
+    window.setTimeout(() => section.classList.remove("section-flash"), 1800);
+  };
+
+  window.setTimeout(reveal, 60);
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -56,8 +103,8 @@ export function Navbar() {
 
   const user = session?.user;
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (path?: string) =>
+    path === "/" ? pathname === "/" : path ? pathname.startsWith(path) : false;
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -71,14 +118,27 @@ export function Navbar() {
     user?.email?.charAt(0)?.toUpperCase() ??
     "S";
 
+  const displayName = user?.name?.trim() || user?.email || "Account";
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <nav className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between gap-6 px-5 sm:px-8">
         <Link
           href="/"
-          className="display text-lg tracking-tight transition-opacity hover:opacity-70 sm:text-xl"
+          className="group flex items-center gap-3 rounded-md"
+          aria-label="StudioSpace home"
         >
-          StudioSpace
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background transition-colors duration-300 group-hover:bg-brand group-hover:text-brand-foreground">
+            <ApertureIcon className="size-5" />
+          </span>
+          <span className="flex flex-col">
+            <span className="display text-lg leading-none tracking-tight sm:text-xl">
+              StudioSpace
+            </span>
+            <span className="mt-1 hidden text-[0.58rem] font-medium tracking-[0.2em] text-muted-foreground uppercase sm:block">
+              Production spaces, by the hour
+            </span>
+          </span>
         </Link>
 
         <ul className="hidden items-center gap-8 lg:flex">
@@ -86,10 +146,11 @@ export function Navbar() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                aria-current={isActive(link.href) ? "page" : undefined}
+                aria-current={isActive(link.path) ? "page" : undefined}
+                onClick={() => flashSection(link.href)}
                 className={cn(
                   "text-[0.9rem] tracking-[0.01em] transition-colors",
-                  isActive(link.href)
+                  isActive(link.path)
                     ? "text-foreground underline decoration-foreground/40 decoration-1 underline-offset-[6px]"
                     : "text-muted-foreground hover:text-foreground",
                 )}
@@ -107,9 +168,9 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 aria-label="Account menu"
-                className="rounded-full ring-offset-background transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex items-center gap-2 rounded-full border border-border bg-background/60 py-1 pr-2.5 pl-1 transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                <Avatar className="size-8">
+                <Avatar className="size-7">
                   <AvatarImage
                     src={user.image as string}
                     referrerPolicy="no-referrer"
@@ -119,6 +180,10 @@ export function Navbar() {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
+                <span className="hidden max-w-[8rem] truncate text-sm font-medium sm:inline">
+                  {displayName}
+                </span>
+                <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 {/* Base UI's group label may only be rendered inside a group,
@@ -196,13 +261,17 @@ export function Navbar() {
                   <DialogClose
                     key={link.href}
                     render={<Link href={link.href} />}
+                    nativeButton={false}
                     className={cn(
                       "rounded-md px-3 py-3 text-base transition-colors",
-                      isActive(link.href)
+                      isActive(link.path)
                         ? "bg-muted text-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      flashSection(link.href);
+                    }}
                   >
                     {link.label}
                   </DialogClose>
@@ -224,6 +293,7 @@ export function Navbar() {
                       <DialogClose
                         key={item.href}
                         render={<Link href={item.href} />}
+                        nativeButton={false}
                         className="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         onClick={() => setMenuOpen(false)}
                       >

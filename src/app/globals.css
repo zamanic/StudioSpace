@@ -232,6 +232,35 @@
 }
 
 /* --------------------------------------------------------------------------
+   Anchor navigation: when the navbar jumps to #how-it-works or #about, the
+   section it lands on draws one on-brand ring so the eye finds it at once.
+   The outline is inset, so it never adds a scrollbar.
+   -------------------------------------------------------------------------- */
+@keyframes section-focus {
+  from {
+    outline: 2px solid var(--brand);
+    outline-offset: 0;
+  }
+  to {
+    outline: 2px solid transparent;
+    outline-offset: 0;
+  }
+}
+
+section[id]:target > *,
+section.section-flash > * {
+  border-radius: var(--radius-lg);
+  animation: section-focus 1.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  section[id]:target > *,
+  section.section-flash > * {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    react-slick gallery (studio photo gallery).
    Slick lays slides out in a row, so every level is given an explicit height to
    fill the fixed-ratio frame, and the default dots are redrawn on-brand.
