@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPinIcon, UsersIcon } from "lucide-react";
+import { MapPinIcon, StarIcon, UsersIcon } from "lucide-react";
 
 import { currency, excerpt, imageProps, primaryImage } from "@/lib/format";
 import type { Studio } from "@/lib/types";
@@ -11,6 +11,7 @@ import type { Studio } from "@/lib/types";
  */
 export function StudioCard({ studio }: { studio: Studio }) {
   const image = primaryImage(studio);
+  const rating = Number(studio.rating ?? 0);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors duration-300 hover:border-foreground/35">
@@ -26,6 +27,16 @@ export function StudioCard({ studio }: { studio: Studio }) {
           sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 92vw"
           className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
         />
+
+        {rating > 0 ? (
+          <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/65 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            <StarIcon className="size-3.5 fill-current text-amber-400" />
+            {rating.toFixed(1)}
+            {studio.reviewCount ? (
+              <span className="text-white/70">({studio.reviewCount})</span>
+            ) : null}
+          </span>
+        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -68,7 +79,7 @@ export function StudioCard({ studio }: { studio: Studio }) {
             href={`/studios/${studio._id}`}
             className="text-xs font-medium tracking-[0.06em] uppercase underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
           >
-            View space
+            View Details
           </Link>
         </div>
       </div>

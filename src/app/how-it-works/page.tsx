@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   CalendarClockIcon,
-  ClipboardCheckIcon,
+  ClapperboardIcon,
   CreditCardIcon,
   SearchIcon,
   ShieldCheckIcon,
@@ -18,32 +18,32 @@ export const metadata = {
 const steps = [
   {
     number: "01",
-    title: "Search the rooms",
+    title: "Discover Spaces",
     icon: SearchIcon,
     body: "Filter the catalogue by city, category, headcount and hourly rate. Every listing is written by the host who owns the space, so the dimensions and the power supply are real.",
     detail:
-      "Categories cover the five kinds of workspace on the platform: photo studios, film stages, podcast lounges, music suites and workshops.",
+      "Categories cover the six kinds of workspace on the platform: photo studios, sound stages, film stages, podcast lounges, music suites and workshops.",
   },
   {
     number: "02",
-    title: "Read the space properly",
-    icon: ClipboardCheckIcon,
+    title: "Select Shoot Hours",
+    icon: CalendarClockIcon,
     body: "Ceiling height, floor area, sound rating, load-in access and the gear that comes included. The details that decide whether a production day runs smoothly are on the listing, not buried in a message thread.",
     detail:
       "Confirmed sessions are shown on the listing, so you can see which slots are already held before you ask for one.",
   },
   {
     number: "03",
-    title: "Request a slot",
-    icon: CalendarClockIcon,
+    title: "Book Instantly",
+    icon: CreditCardIcon,
     body: "Choose the date and the hours. The API checks the request against every confirmed booking on that space and refuses a clash with a clear message rather than a silent double-booking.",
     detail:
       "Each studio sets its own minimum booking length, shown on the price panel before you commit.",
   },
   {
     number: "04",
-    title: "Book, then shoot",
-    icon: CreditCardIcon,
+    title: "Create & Produce",
+    icon: ClapperboardIcon,
     body: "Your request is saved as pending and the host is notified. While it is pending you can cancel it yourself; once it is confirmed the terms are locked in for both sides.",
     detail:
       "The security deposit is recorded with the booking and released once the host marks the session complete.",

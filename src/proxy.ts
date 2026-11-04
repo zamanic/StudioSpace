@@ -13,8 +13,11 @@ export async function proxy(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
+    const { pathname, search } = request.nextUrl;
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+    // Keep the query string too, so a filtered or deep-linked private route
+    // comes back exactly as it was after signing in.
+    loginUrl.searchParams.set("redirect", `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
 

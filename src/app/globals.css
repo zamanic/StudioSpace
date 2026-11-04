@@ -231,6 +231,56 @@
   background: color-mix(in oklch, var(--foreground) 18%, transparent);
 }
 
+/* --------------------------------------------------------------------------
+   react-slick gallery (studio photo gallery).
+   Slick lays slides out in a row, so every level is given an explicit height to
+   fill the fixed-ratio frame, and the default dots are redrawn on-brand.
+   -------------------------------------------------------------------------- */
+.space-gallery .slick-slider,
+.space-gallery .slick-list,
+.space-gallery .slick-track,
+.space-gallery .slick-slide,
+.space-gallery .slick-slide > div {
+  height: 100%;
+}
+
+.space-gallery .slick-dots {
+  bottom: 1.1rem;
+  z-index: 10;
+}
+
+.space-gallery .slick-dots li,
+.space-gallery .slick-dots li button {
+  width: 9px;
+  height: 9px;
+  margin: 0 3px;
+  padding: 0;
+}
+
+.space-gallery .slick-dots li button {
+  border: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition:
+    background 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.space-gallery .slick-dots li button::before {
+  content: none;
+}
+
+.space-gallery .slick-dots li.slick-active button {
+  background: #ffffff;
+  transform: scale(1.25);
+}
+
+.space-gallery .slick-dots li button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

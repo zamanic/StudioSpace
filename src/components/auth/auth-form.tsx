@@ -4,9 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { MailIcon, LockIcon, UserIcon } from "lucide-react";
+import { LinkIcon, LockIcon, MailIcon, UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -47,15 +56,25 @@ const passwordIssues = (password: string) => {
   return issues;
 };
 
+const isHttpUrl = (value: string) => /^https?:\/\/.+/i.test(value.trim());
+
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
   const isRegister = mode === "register";
 
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    image: "",
+    password: "",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  // After a successful sign-up we sign the new account out and hand the user to
+  // /login, so the session effect must not bounce them to the target route yet.
+  const [holdRedirect, setHoldRedirect] = useState(false);
   // OAuth hands the browser off to the provider, so without this the button
   // stays live and a second click could start a second handshake.
   const [socialPending, setSocialPending] = useState<
@@ -65,8 +84,15 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const { data: session } = authClient.useSession();
 
   useEffect(() => {
-    if (session?.user) router.replace(redirectTo);
-  }, [session, redirectTo, router]);
+    if (session?.user && !holdRedirect) router.replace(redirectTo);
+  }, [session, redirectTo, router, holdRedirect]);
+
+  // Carry the intended route across the two auth views so a redirected visitor
+  // still lands where they were going after switching between them.
+  const withRedirect = (path: string) =>
+    redirectTo && redirectTo !== "/"
+      ? `${path}?redirect=${encodeURIComponent(redirectTo)}`
+      : path;
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((previous) => ({ ...previous, [key]: value }));
@@ -75,6 +101,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const next: Record<string, string> = {};
     if (isRegister && form.name.trim().length < 2) {
       next.name = "Tell us what to call you (2+ characters).";
+    }
+    if (isRegister && !isHttpUrl(form.image)) {
+      next.image = "Add a photo URL that starts with http:// or https://";
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       next.email = "Enter a valid email address.";
@@ -93,16 +122,37 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     setSubmitting(true);
     try {
-      const result = isRegister
-        ? await authClient.signUp.email({
-            name: form.name.trim(),
-            email: form.email.trim(),
-            password: form.password,
-          })
-        : await authClient.signIn.email({
-            email: form.email.trim(),
-            password: form.password,
-          });
+      if (isRegister) {
+        const result = await authClient.signUp.email({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          image: form.image.trim(),
+        });
+
+        if (result.error) {
+          toast.error(
+            result.error.message ?? "That did not work. Check your details.",
+          );
+          return;
+        }
+
+        // The spec asks registration to end on the login page, so close the
+        // session Better Auth just opened and hand over to /login.
+        setHoldRedirect(true);
+        await authClient.signOut();
+        toast.success("Account created", {
+          description: "Sign in with the email and password you just chose.",
+        });
+        router.push(withRedirect("/login"));
+        router.refresh();
+        return;
+      }
+
+      const result = await authClient.signIn.email({
+        email: form.email.trim(),
+        password: form.password,
+      });
 
       if (result.error) {
         toast.error(
@@ -111,11 +161,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         return;
       }
 
-      toast.success(isRegister ? "Account created" : "Welcome back", {
-        description: isRegister
-          ? "You can start booking and listing spaces straight away."
-          : "You are signed in.",
-      });
+      toast.success("Welcome back", { description: "You are signed in." });
       router.push(redirectTo);
       router.refresh();
     } catch {
@@ -152,15 +198,17 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             : "Bookings, listings and cancellations all live behind your account."}
         </p>
 
-        <p className="mt-10 text-sm text-muted-foreground">
-          {isRegister ? "Already have an account?" : "New to StudioSpace?"}{" "}
-          <Link
-            href={isRegister ? "/login" : "/register"}
-            className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
-          >
-            {isRegister ? "Sign in instead" : "Create one"}
-          </Link>
-        </p>
+        {isRegister ? (
+          <p className="mt-10 text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href={withRedirect("/login")}
+              className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+            >
+              Sign in instead
+            </Link>
+          </p>
+        ) : null}
       </div>
 
       <div className="w-full max-w-[30rem]">
@@ -209,8 +257,63 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             ) : null}
           </div>
 
+          {isRegister ? (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="photo">Photo URL</Label>
+              <div className="relative">
+                <LinkIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="photo"
+                  type="url"
+                  className="pl-9"
+                  autoComplete="photo"
+                  value={form.image}
+                  aria-invalid={Boolean(errors.image)}
+                  placeholder="https://example.com/me.jpg"
+                  onChange={(event) => set("image", event.target.value)}
+                />
+              </div>
+              {errors.image ? (
+                <p className="text-xs text-destructive">{errors.image}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  A link to a picture we can show beside your listings.
+                </p>
+              )}
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="password">Password</Label>
+              {!isRegister ? (
+                <Dialog>
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                      >
+                        Forgot password?
+                      </button>
+                    }
+                  />
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Password reset is not enabled</DialogTitle>
+                      <DialogDescription>
+                        StudioSpace deliberately ships without email
+                        verification and password reset, so an examiner can
+                        register and sign straight in. If you have lost a
+                        password, create a new account with a different email
+                        address.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter showCloseButton />
+                  </DialogContent>
+                </Dialog>
+              ) : null}
+            </div>
             <div className="relative">
               <LockIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -242,7 +345,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             disabled={submitting}
           >
             {submitting ? <Spinner /> : null}
-            {isRegister ? "Create account" : "Sign in"}
+            {isRegister ? "Register" : "Sign in"}
           </Button>
 
           {showSocial ? (
@@ -282,6 +385,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                 ) : null}
               </div>
             </>
+          ) : null}
+
+          {!isRegister ? (
+            <p className="border-t border-border pt-5 text-center text-sm text-muted-foreground">
+              New to StudioSpace?{" "}
+              <Link
+                href={withRedirect("/register")}
+                className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+              >
+                Create an account
+              </Link>
+            </p>
           ) : null}
         </form>
       </div>

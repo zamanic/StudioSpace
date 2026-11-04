@@ -3,11 +3,12 @@ import type {
   Booking,
   BookingPayload,
   CatalogueStats,
+  Review,
   Studio,
   StudioPayload,
 } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * Every failure from the Express API arrives as `{ code, message }`. Throwing
@@ -33,7 +34,10 @@ type RequestOptions = {
   cache?: RequestCache;
 };
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const { method = "GET", body, token, cache } = options;
 
   const headers: Record<string, string> = {};
@@ -90,6 +94,9 @@ export const api = {
 
   getStudio: (id: string) => request<Studio>(`/studios/${id}`),
 
+  getReviews: (studioId: string) =>
+    request<Review[]>(`/studios/${studioId}/reviews`),
+
   getStats: () => request<CatalogueStats>("/stats"),
 
   getAvailability: (studioId: string) =>
@@ -98,7 +105,8 @@ export const api = {
   createStudio: (payload: StudioPayload, token: string) =>
     request<Studio>("/add-studio", { method: "POST", body: payload, token }),
 
-  getMyListings: (token: string) => request<Studio[]>("/my-listings", { token }),
+  getMyListings: (token: string) =>
+    request<Studio[]>("/my-listings", { token }),
 
   updateStudio: (id: string, payload: StudioPayload, token: string) =>
     request<{ modifiedCount: number; studio: Studio }>(`/studios/${id}`, {

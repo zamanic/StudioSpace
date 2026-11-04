@@ -8,6 +8,7 @@
 export const CATEGORIES = [
   "Photo Studio",
   "Film Stage",
+  "Sound Stage",
   "Podcast Lounge",
   "Music Suite",
   "Workshop",
@@ -207,4 +208,15 @@ export type AvailabilitySlot = {
   bookingDate: string;
   startTime: string;
   endTime: string;
+};
+
+/** A creator review attached to one studio (seed-extra.json → "reviews"). */
+export type Review = {
+  _id: string;
+  studioId: string;
+  authorName: string;
+  authorAvatar?: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
 };

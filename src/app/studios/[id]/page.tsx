@@ -14,13 +14,15 @@ import {
   WrenchIcon,
   ZapIcon,
 } from "lucide-react";
+import { cn } from "cn";
 
 import { BookingPanel } from "@/components/studios/booking-panel";
 import { StudioGallery } from "@/components/studios/studio-gallery";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ApiError, api } from "@/lib/api";
 import { auth } from "@/lib/auth";
-import type { AvailabilitySlot, Studio } from "@/lib/types";
+import { shortDate } from "@/lib/format";
+import type { AvailabilitySlot, Review, Studio } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +61,28 @@ function Spec({
   );
 }
 
+function Stars({ value, className }: { value: number; className?: string }) {
+  const filled = Math.round(value);
+  return (
+    <span
+      className="inline-flex items-center gap-0.5"
+      aria-label={`${value.toFixed(1)} out of 5`}
+    >
+      {[1, 2, 3, 4, 5].map((step) => (
+        <StarIcon
+          key={step}
+          className={cn(
+            className,
+            step <= filled
+              ? "fill-current text-brand"
+              : "text-muted-foreground/35",
+          )}
+        />
+      ))}
+    </span>
+  );
+}
+
 export default async function StudioDetailPage({ params }: { params: Params }) {
   const { id } = await params;
 
@@ -90,6 +114,13 @@ export default async function StudioDetailPage({ params }: { params: Params }) {
     availability = [];
   }
 
+  let reviews: Review[] = [];
+  try {
+    reviews = await api.getReviews(id);
+  } catch {
+    reviews = [];
+  }
+
   const session = await auth.api.getSession({ headers: await headers() });
   const viewerEmail = String(session?.user?.email ?? "").toLowerCase();
   const isAuthenticated = Boolean(session?.user);
@@ -99,6 +130,13 @@ export default async function StudioDetailPage({ params }: { params: Params }) {
 
   const specs = studio.specs ?? {};
   const rating = Number(studio.rating ?? 0);
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce(
+          (total, review) => total + Number(review.rating ?? 0),
+          0,
+        ) / reviews.length
+      : rating;
 
   return (
     <article className="mx-auto w-full max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14">
@@ -294,6 +332,71 @@ export default async function StudioDetailPage({ params }: { params: Params }) {
                 {studio.host?.phone ? <p>{studio.host.phone}</p> : null}
               </div>
             </div>
+          </section>
+
+          <section>
+            <h2 className="font-heading text-2xl">Reviews</h2>
+            <div className="rule mt-5" />
+
+            {reviews.length > 0 ? (
+              <>
+                <div className="mt-6 flex flex-wrap items-end gap-x-6 gap-y-2">
+                  <p className="display text-[3.2rem] leading-none">
+                    {averageRating.toFixed(1)}
+                  </p>
+                  <div className="flex flex-col gap-1.5 pb-1">
+                    <Stars value={averageRating} className="size-4" />
+                    <p className="text-sm text-muted-foreground">
+                      {reviews.length}{" "}
+                      {reviews.length === 1 ? "review" : "reviews"} from
+                      creators
+                    </p>
+                  </div>
+                </div>
+
+                <ul className="mt-8 grid gap-5 sm:grid-cols-2">
+                  {reviews.map((review) => (
+                    <li
+                      key={review._id}
+                      className="flex flex-col gap-3 rounded-lg border border-border bg-card p-5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-9">
+                          <AvatarImage
+                            src={review.authorAvatar || undefined}
+                            referrerPolicy="no-referrer"
+                            alt=""
+                          />
+                          <AvatarFallback>
+                            {review.authorName?.charAt(0)?.toUpperCase() ?? "C"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">
+                            {review.authorName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {shortDate(review.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <Stars
+                        value={Number(review.rating ?? 0)}
+                        className="size-3.5"
+                      />
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {review.comment}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="mt-6 rounded-lg border border-dashed border-border px-5 py-10 text-center text-sm text-muted-foreground">
+                No reviews yet. Be the first to book this space and share how
+                the shoot went.
+              </p>
+            )}
           </section>
         </div>
 

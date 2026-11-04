@@ -16,7 +16,7 @@ const slides = [
   {
     image: "/studios/film-stage-crew.jpg",
     alt: "A film crew working on a lit sound stage",
-    caption: "Film Stage · Dhaka",
+    caption: "Sound Stage · Dhaka",
   },
   {
     image: "/studios/photo-studio-cyc.png",
@@ -90,7 +90,7 @@ export function HeroCarousel() {
               through the gap between the two halves. */}
           <p className="rise-2 mt-8 hidden max-w-[1300px] grid-cols-12 gap-0 text-[1.05rem] leading-relaxed text-white/85 lg:grid">
             <span className="col-span-5 text-right">
-              Photo studios, film stages and podcast rooms,
+              Photo studios, sound stages and podcast rooms,
             </span>
             <span className="col-span-2" aria-hidden="true" />
             <span className="col-span-5">
@@ -98,11 +98,11 @@ export function HeroCarousel() {
             </span>
           </p>
           <p className="rise-2 mt-6 max-w-[36ch] text-[1.05rem] leading-relaxed text-white/85 lg:hidden">
-            Photo studios, film stages and podcast rooms, each one listed by the
-            person who built it.
+            Photo studios, sound stages and podcast rooms, each one listed by
+            the person who built it.
           </p>
 
-          <div className="rise-3 pointer-events-auto mt-auto flex flex-wrap items-center gap-4 pb-14 lg:pb-16">
+          <div className="rise-3 pointer-events-auto mt-auto flex flex-wrap items-center gap-5 pb-14 lg:pb-16">
             <Button
               size="lg"
               variant="secondary"
@@ -113,10 +113,10 @@ export function HeroCarousel() {
               Explore Studios
             </Button>
             <Link
-              href="/how-it-works"
+              href="/add-studio"
               className="text-sm text-white/85 underline decoration-white/35 underline-offset-4 transition-colors hover:decoration-white"
             >
-              See how booking works
+              Host Your Space
             </Link>
           </div>
         </div>

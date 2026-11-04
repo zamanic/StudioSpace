@@ -3,9 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   BadgeCheckIcon,
-  CalendarClockIcon,
   HeadphonesIcon,
   ShieldCheckIcon,
+  WrenchIcon,
 } from "lucide-react";
 
 import { HeroCarousel } from "@/components/home/hero-carousel";
@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic";
 
 const categories = [
   { label: "Photo Studio", image: "/studios/photo-studio-cyc.png" },
+  { label: "Sound Stage", image: "/studios/film-stage-crew.jpg" },
   { label: "Film Stage", image: "/studios/film-stage-exterior.jpg" },
   { label: "Podcast Lounge", image: "/studios/podcast-lounge-wcwc.jpg" },
   { label: "Music Suite", image: "/studios/music-suite-desk.jpg" },
@@ -30,23 +31,23 @@ const categories = [
 const steps = [
   {
     number: "01",
-    title: "Search the rooms",
-    body: "Filter by city, category, capacity and hourly rate until one room fits the shoot.",
+    title: "Discover Spaces",
+    body: "Search the catalogue by city, category, capacity and hourly rate until one room fits the shoot.",
   },
   {
     number: "02",
-    title: "Read the space",
-    body: "Check the dimensions, ceiling height, power and the gear that comes with the booking.",
+    title: "Select Shoot Hours",
+    body: "Choose the date and the hours you need. Times that clash with a confirmed booking are refused.",
   },
   {
     number: "03",
-    title: "Pick a slot",
-    body: "Choose the date and the hours. Times that clash with a confirmed booking are refused.",
+    title: "Book Instantly",
+    body: "Your request is saved as pending the moment you send it, and you can cancel it yourself while it waits.",
   },
   {
     number: "04",
-    title: "Book and shoot",
-    body: "Your request goes to the host as pending. Cancel it yourself any time while it is pending.",
+    title: "Create & Produce",
+    body: "Turn up, set up and shoot. The dimensions, power and included gear are already on the listing.",
   },
 ];
 
@@ -108,7 +109,7 @@ export default function HomePage() {
       <section className="mx-auto w-full max-w-[1400px] px-5 py-20 sm:px-8 sm:py-24">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <h2 className="display max-w-[18ch] text-[clamp(2rem,3.6vw,3.25rem)]">
-            Five kinds of room, one booking page
+            Browse by studio category
           </h2>
           <p className="max-w-[36ch] text-sm leading-relaxed text-muted-foreground">
             Every listing is sorted into a category so you know what you are
@@ -116,7 +117,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {categories.map((category) => (
             <Link
               key={category.label}
@@ -230,44 +231,40 @@ export default function HomePage() {
               <li className="flex gap-4">
                 <ShieldCheckIcon className="mt-0.5 size-5 shrink-0 text-brand" />
                 <div>
-                  <h3 className="font-heading text-lg">
-                    Deposits held, not taken
-                  </h3>
+                  <h3 className="font-heading text-lg">Liability protection</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    The security deposit is recorded with the booking and
-                    released once the host marks the session complete.
-                  </p>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <CalendarClockIcon className="mt-0.5 size-5 shrink-0 text-brand" />
-                <div>
-                  <h3 className="font-heading text-lg">No double bookings</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    A slot that overlaps an already confirmed session is
-                    rejected at the API, so two crews never arrive together.
+                    Every confirmed booking is covered against accidental damage
+                    to the space, so a shoot day never turns into a repair bill.
                   </p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <BadgeCheckIcon className="mt-0.5 size-5 shrink-0 text-brand" />
                 <div>
-                  <h3 className="font-heading text-lg">
-                    Every listing is owned
-                  </h3>
+                  <h3 className="font-heading text-lg">Verified profiles</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    Only the host who created a listing can edit or remove it,
-                    verified against the signed-in account.
+                    Hosts and creators sign in through a verified account, and
+                    only the host who listed a space can edit or remove it.
+                  </p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <WrenchIcon className="mt-0.5 size-5 shrink-0 text-brand" />
+                <div>
+                  <h3 className="font-heading text-lg">Equipment safety</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    Included gear is listed on every space and the deposit is
+                    held with the booking, then released once the session ends.
                   </p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <HeadphonesIcon className="mt-0.5 size-5 shrink-0 text-brand" />
                 <div>
-                  <h3 className="font-heading text-lg">Support that answers</h3>
+                  <h3 className="font-heading text-lg">24/7 host support</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    A real person reads every booking note. Hosts reply within
-                    an hour on average.
+                    A real person reads every booking note around the clock, so
+                    a question at midnight still gets an answer.
                   </p>
                 </div>
               </li>
@@ -302,7 +299,7 @@ export default function HomePage() {
               href="/add-studio"
               className="text-sm underline decoration-current/40 underline-offset-4 transition-opacity hover:opacity-80"
             >
-              List a studio instead
+              Host Your Space
             </Link>
           </div>
         </div>
