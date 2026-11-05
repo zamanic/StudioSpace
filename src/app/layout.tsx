@@ -32,6 +32,18 @@ export const metadata: Metadata = {
   },
   description:
     "StudioSpace is a peer-to-peer marketplace for photo studios, film stages, podcast lounges, music suites and workshops. Find the room, check the gear, book it by the hour.",
+  // Declared here rather than through the app/icon.svg file convention so the
+  // tab keeps the brand aperture on every route instead of the browser's
+  // generic globe. The SVG is listed last because browsers that understand it
+  // prefer it; favicon.ico is the fallback for everything older.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32", type: "image/x-icon" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
