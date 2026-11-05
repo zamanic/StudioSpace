@@ -9,11 +9,13 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   MapPinIcon,
+  TagIcon,
   UsersIcon,
   XCircleIcon,
 } from "lucide-react";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { ReceiptButton } from "@/components/bookings/receipt-button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,9 +30,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ApiError, api } from "@/lib/api";
-import { clockTime, currency, imageProps, shortDate } from "@/lib/format";
+import { addressLine, clockTime, currency, imageProps, shortDate } from "@/lib/format";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import type { Booking } from "@/lib/types";
+
+/** The one line of state a creator needs at a glance, under the actions. */
+const statusNotes: Record<string, string> = {
+  Pending: "Waiting on the host to confirm your slot.",
+  Confirmed: "Confirmed by the host. Deposit held until the session completes.",
+  Completed: "Session complete. Deposit released.",
+  Cancelled: "This booking was cancelled and its slot was released.",
+};
 
 export function BookingCard({ booking }: { booking: Booking }) {
   const router = useRouter();
@@ -38,6 +48,12 @@ export function BookingCard({ booking }: { booking: Booking }) {
   const [cancelling, setCancelling] = useState(false);
 
   const canCancel = booking.status === "Pending";
+  // A cancelled reservation has no valid receipt, so the button disappears
+  // with it rather than sitting there and opening a void invoice.
+  const canReceipt = booking.status !== "Cancelled";
+  const paid =
+    String(booking.payment?.paymentStatus ?? "").toLowerCase() === "paid";
+  const address = addressLine(booking.studioLocation);
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -80,7 +96,7 @@ export function BookingCard({ booking }: { booking: Booking }) {
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
             <p className="text-[0.68rem] font-medium tracking-[0.18em] text-muted-foreground uppercase">
               {booking.bookingNumber}
@@ -94,7 +110,20 @@ export function BookingCard({ booking }: { booking: Booking }) {
               </Link>
             </h2>
           </div>
-          <BookingStatusBadge status={booking.status} />
+
+          {/* Status and money read as one right-hand column, so the eye lands
+              on "what state is this in" and "what did it cost" together. */}
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <BookingStatusBadge status={booking.status} />
+            <div className="sm:text-right">
+              <p className="text-[0.62rem] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+                {paid ? "Total charged" : "Due"}
+              </p>
+              <p className="font-heading text-xl leading-tight">
+                {currency(booking.pricingSummary?.totalAmount)}
+              </p>
+            </div>
+          </div>
         </div>
 
         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -117,35 +146,38 @@ export function BookingCard({ booking }: { booking: Booking }) {
             {booking.projectDetails?.crewSize} crew
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <MapPinIcon className="size-3.5" />
+            <TagIcon className="size-3.5" />
             {booking.studioCategory}
           </span>
         </div>
 
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
-          <span className="font-heading text-lg">
-            {currency(booking.pricingSummary?.totalAmount)}
-            <span className="ml-1.5 font-sans text-xs text-muted-foreground">
-              total
-            </span>
+        {/* Where the space actually is, right under the session time. Falls
+            back to the category when the listing has since been removed. */}
+        <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <MapPinIcon className="mt-0.5 size-3.5 shrink-0" />
+          <span className="min-w-0 truncate">
+            {address || booking.studioCategory}
           </span>
+        </p>
 
-          {canCancel ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setOpen(true)}
-            >
-              <XCircleIcon />
-              Cancel booking
-            </Button>
-          ) : (
-            <span className="text-xs text-muted-foreground">
-              {booking.status === "Cancelled"
-                ? "This booking was cancelled."
-                : `A ${booking.status.toLowerCase()} booking can no longer be cancelled.`}
-            </span>
-          )}
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-border pt-4">
+          <p className="text-xs text-muted-foreground">
+            {statusNotes[booking.status] ?? ""}
+          </p>
+
+          <div className="flex items-center gap-2">
+            {canReceipt ? <ReceiptButton booking={booking} /> : null}
+            {canCancel ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setOpen(true)}
+              >
+                <XCircleIcon />
+                Cancel booking
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
 

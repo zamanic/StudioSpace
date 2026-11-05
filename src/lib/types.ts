@@ -140,6 +140,12 @@ export type Booking = {
   studioTitle: string;
   studioCategory: string;
   studioImage: string;
+  /**
+   * Joined in by GET /my-bookings ($lookup against the studios collection) so
+   * the card and its receipt can show where the space actually is. Absent if
+   * the listing has since been deleted.
+   */
+  studioLocation?: StudioLocation;
   creator: BookingCreator;
   hostEmail: string;
   schedule: {
@@ -164,6 +170,17 @@ export type Booking = {
     specialRequirements?: string;
   };
   status: BookingStatus;
+  /** Present on the seeded reservations; a fresh booking starts Unpaid. */
+  payment?: {
+    paymentStatus?: string;
+    paymentMethod?: string;
+    transactionId?: string;
+    paidAt?: string;
+  };
+  invoice?: {
+    pdfUrl?: string;
+    generatedAt?: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 };

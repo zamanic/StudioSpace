@@ -1,11 +1,12 @@
-import type { Studio } from "./types";
+import type { Studio, StudioLocation } from "./types";
 
 /** $12.00 style price from the store's USD values. */
 export function currency(value: number | undefined | null) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: value !== undefined && value !== null && value % 1 !== 0 ? 2 : 0,
+    maximumFractionDigits:
+      value !== undefined && value !== null && value % 1 !== 0 ? 2 : 0,
   }).format(Number(value ?? 0));
 }
 
@@ -41,12 +42,24 @@ export function hoursBetween(start: string, end: string) {
 }
 
 export function titleCase(value: string) {
-  return value.replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase());
+  return value.replace(
+    /\w\S*/g,
+    (word) => word[0].toUpperCase() + word.slice(1).toLowerCase(),
+  );
+}
+
+/** "450 Production Way, Dhaka, Dhaka Division" - reads like a postal address. */
+export function addressLine(location: StudioLocation | undefined) {
+  return [location?.address, location?.city, location?.state]
+    .filter(Boolean)
+    .join(", ");
 }
 
 export function primaryImage(studio: Pick<Studio, "images">) {
   const primary = studio.images?.find((image) => image.isPrimary);
-  return primary?.url || studio.images?.[0]?.url || "/studios/photo-studio-cyc.png";
+  return (
+    primary?.url || studio.images?.[0]?.url || "/studios/photo-studio-cyc.png"
+  );
 }
 
 /** Turns a long description into 2 lines of teaser for the grid cards. */
@@ -62,7 +75,5 @@ export function excerpt(value: string, length = 110) {
  */
 export function imageProps(url: string) {
   const isLocal = url.startsWith("/");
-  return isLocal
-    ? { src: url }
-    : { src: url, unoptimized: true };
+  return isLocal ? { src: url } : { src: url, unoptimized: true };
 }
