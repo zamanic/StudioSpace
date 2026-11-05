@@ -5,7 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { EyeIcon, MapPinIcon, PencilIcon, Trash2Icon, UsersIcon } from "lucide-react";
+import {
+  BadgeDollarSignIcon,
+  EyeIcon,
+  PencilIcon,
+  Trash2Icon,
+  UsersIcon,
+} from "lucide-react";
 
 import {
   AlertDialog,
@@ -57,23 +63,34 @@ export function MyListingCard({ studio }: { studio: Studio }) {
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card">
-      <Link
-        href={`/studios/${studio._id}`}
-        className="relative block aspect-[16/10] overflow-hidden bg-muted"
-      >
-        <Image
-          {...imageProps(primaryImage(studio))}
-          alt={studio.title}
-          fill
-          sizes="(min-width:1024px) 30vw, 92vw"
-          className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.04]"
-        />
-      </Link>
+      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+        <Link
+          href={`/studios/${studio._id}`}
+          className="absolute inset-0"
+          aria-label={`View ${studio.title}`}
+        >
+          <Image
+            {...imageProps(primaryImage(studio))}
+            alt={studio.title}
+            fill
+            sizes="(min-width:1024px) 30vw, 92vw"
+            className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.04]"
+          />
+        </Link>
+
+        {/* The same two corner badges the catalogue card uses, so a host
+            recognises their own listing in either place. */}
+        <span className="pointer-events-none absolute top-3 left-3 inline-flex items-center rounded-full bg-black/65 px-2.5 py-1 text-[0.62rem] font-medium tracking-[0.12em] text-white uppercase backdrop-blur-sm">
+          {studio.category}
+        </span>
+
+        <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-baseline gap-1 rounded-full bg-black/65 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          {currency(studio.pricing?.hourlyRate)}
+          <span className="text-[0.65rem] font-normal text-white/75">/ hr</span>
+        </span>
+      </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="text-[0.68rem] font-medium tracking-[0.18em] text-muted-foreground uppercase">
-          {studio.category}
-        </p>
         <h2 className="font-heading text-lg leading-snug">
           <Link href={`/studios/${studio._id}`} className="hover:opacity-70">
             {studio.title}
@@ -83,20 +100,14 @@ export function MyListingCard({ studio }: { studio: Studio }) {
           {excerpt(studio.tagline || studio.description, 84)}
         </p>
 
-        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-xs text-muted-foreground">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            <MapPinIcon className="size-3.5" />
-            {studio.location?.city}
+            <UsersIcon className="size-3.5 shrink-0" />
+            Up to {studio.specs?.maxCapacity} creators
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <UsersIcon className="size-3.5" />
-            {studio.specs?.maxCapacity}
-          </span>
-          <span className="ml-auto font-heading text-base text-foreground">
-            {currency(studio.pricing?.hourlyRate)}
-            <span className="ml-1 font-sans text-xs text-muted-foreground">
-              /hr
-            </span>
+            <BadgeDollarSignIcon className="size-3.5 shrink-0" />
+            Deposit: {currency(studio.pricing?.securityDeposit)}
           </span>
         </div>
 
