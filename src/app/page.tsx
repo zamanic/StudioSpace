@@ -303,7 +303,7 @@ export default function HomePage() {
       <section className="mx-auto w-full max-w-[1400px] px-5 py-20 sm:px-8 sm:py-24">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className={tagClass}>Curated selection (limited to 6)</p>
+            <p className={tagClass}>Curated selection (MongoDB .limit(6))</p>
             <h2 className="display mt-4 max-w-[20ch] text-[clamp(2rem,3.6vw,3.25rem)]">
               Featured Creative Workspaces
             </h2>
