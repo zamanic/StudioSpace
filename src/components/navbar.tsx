@@ -8,6 +8,7 @@ import {
   ApertureIcon,
   CalendarCheckIcon,
   ChevronDownIcon,
+  HeartIcon,
   HomeIcon,
   LayoutGridIcon,
   LogOutIcon,
@@ -54,6 +55,7 @@ const accountLinks = [
   { href: "/add-studio", label: "Add New Studio", icon: PlusIcon },
   { href: "/my-listings", label: "My Studio Listings", icon: LayoutGridIcon },
   { href: "/my-bookings", label: "My Bookings", icon: CalendarCheckIcon },
+  { href: "/my-wishlist", label: "Saved Studios", icon: HeartIcon },
 ];
 
 /**

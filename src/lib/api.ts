@@ -132,4 +132,21 @@ export const api = {
       `/bookings/${id}/cancel`,
       { method: "PATCH", token },
     ),
+
+  getWishlistIds: (token: string) =>
+    request<string[]>("/my-wishlist/ids", { token }),
+
+  getMyWishlist: (token: string) => request<Studio[]>("/my-wishlist", { token }),
+
+  saveToWishlist: (studioId: string, token: string) =>
+    request<{ saved: boolean; studioId: string }>(`/wishlist/${studioId}`, {
+      method: "POST",
+      token,
+    }),
+
+  removeFromWishlist: (studioId: string, token: string) =>
+    request<{ saved: boolean; removed: number }>(`/wishlist/${studioId}`, {
+      method: "DELETE",
+      token,
+    }),
 };

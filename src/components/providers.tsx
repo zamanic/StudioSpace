@@ -3,6 +3,7 @@
 import { ThemeProvider } from "next-themes";
 
 import { Toaster } from "@/components/ui/sonner";
+import { WishlistProvider } from "@/components/wishlist-provider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,8 +13,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem={false}
       disableTransitionOnChange
     >
-      {children}
-      <Toaster />
+      {/* The saved-studio ids are resolved once here, then every card heart
+          reads them from context instead of running its own lookup. */}
+      <WishlistProvider>
+        {children}
+        <Toaster />
+      </WishlistProvider>
     </ThemeProvider>
   );
 }
