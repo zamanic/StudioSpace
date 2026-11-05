@@ -16,6 +16,23 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
+export const CATEGORY_FILTER_OPTIONS = [
+  { label: "All", value: "all" },
+  { label: "Photo Studio", value: "Photo Studio" },
+  { label: "Film Stage", value: "Film Stage" },
+  { label: "Sound Stage", value: "Sound Stage" },
+  { label: "Podcast Room", value: "Podcast Lounge" },
+  { label: "Music Suite", value: "Music Suite" },
+  { label: "Art Workshop", value: "Workshop" },
+] as const;
+
+export function normalizeCategoryFilter(value: string | undefined | null) {
+  if (!value) return undefined;
+  if (value === "Podcast Room") return "Podcast Lounge";
+  if (value === "Art Workshop") return "Workshop";
+  return value;
+}
+
 export const BOOKING_STATUSES = [
   "Pending",
   "Confirmed",
@@ -97,6 +114,8 @@ export type StudioPayload = {
   category: string;
   tagline: string;
   description: string;
+  rating: number;
+  reviewCount: number;
   location: {
     address: string;
     city: string;

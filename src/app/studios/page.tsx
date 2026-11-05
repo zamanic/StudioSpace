@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 
 import { EmptyState } from "@/components/empty-state";
-import { StudioCard, StudioCardSkeleton } from "@/components/studio-card";
+import { StudioCardSkeleton } from "@/components/studio-card";
 import {
   StudioFilterBar,
   StudioFilterBarSkeleton,
 } from "@/components/studios/filter-bar";
+import { StudiosGrid } from "@/components/studios/studios-grid";
 import { api, type StudioFilters } from "@/lib/api";
-import type { Studio } from "@/lib/types";
+import { normalizeCategoryFilter, type Studio } from "@/lib/types";
 
 // Results depend on the query string, so the grid is rendered per request.
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ function toFilters(
   const filters: StudioFilters = {};
 
   const search = first(params.search);
-  const category = first(params.category);
+  const category = normalizeCategoryFilter(first(params.category));
   const sort = first(params.sort);
   const minPrice = Number(first(params.minPrice));
   const maxPrice = Number(first(params.maxPrice));
@@ -98,14 +99,17 @@ async function StudioResults({
 
   return (
     <>
-      <p className="mb-8 text-sm text-muted-foreground">
-        {studios.length} {studios.length === 1 ? "space" : "spaces"} available
-      </p>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {studios.map((studio) => (
-          <StudioCard key={studio._id} studio={studio} />
-        ))}
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Showing {studios.length}{" "}
+          {studios.length === 1 ? "creative space" : "creative spaces"}
+        </p>
+        <p className="max-w-[38ch] text-xs leading-relaxed text-muted-foreground">
+          Saved studios stay pinned to the top of this result set for signed-in
+          creators, so favourites remain easy to revisit while you filter.
+        </p>
       </div>
+      <StudiosGrid studios={studios} />
     </>
   );
 }
@@ -132,17 +136,24 @@ export default async function StudiosPage({
   return (
     <>
       <section className="mx-auto w-full max-w-[1400px] px-5 pt-16 pb-12 sm:px-8 sm:pt-20">
-        <p className="text-[0.7rem] font-medium tracking-[0.24em] text-muted-foreground uppercase">
-          Catalogue
+        <p className="inline-flex rounded-full bg-brand/10 px-3 py-1 text-[0.7rem] font-medium tracking-[0.16em] text-brand uppercase">
+          Full marketplace catalog
         </p>
-        <h1 className="display rise mt-5 max-w-[22ch] text-[clamp(2.5rem,5.4vw,4.5rem)]">
-          Every room, priced and ready
-        </h1>
-        <p className="rise-2 mt-6 max-w-[52ch] text-[0.95rem] leading-relaxed text-muted-foreground">
-          Filter by what the shoot actually needs - city, category, headcount
-          and hourly rate. Nothing here is stock copy; every listing was written
-          by the host who owns the space.
-        </p>
+        <div className="mt-5 flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <h1 className="display rise max-w-[18ch] text-[clamp(2.4rem,5vw,4.2rem)]">
+              Explore Creative Studios
+            </h1>
+            <p className="rise-2 mt-4 max-w-[56ch] text-[0.95rem] leading-relaxed text-muted-foreground">
+              Discover sound stages, photography cycloramas, podcast hubs, and
+              mixing rooms with category pills, saved-studio hearts, and
+              practical filters that stay shareable in the URL.
+            </p>
+          </div>
+          <p className="pt-2 text-sm text-muted-foreground">
+            Saved spaces surface first for signed-in creators
+          </p>
+        </div>
       </section>
 
       <Suspense fallback={<StudioFilterBarSkeleton />}>
@@ -150,10 +161,7 @@ export default async function StudiosPage({
       </Suspense>
 
       <section className="mx-auto w-full max-w-[1400px] px-5 py-14 sm:px-8 sm:py-16">
-        <Suspense
-          key={JSON.stringify(filters)}
-          fallback={<ResultsSkeleton />}
-        >
+        <Suspense key={JSON.stringify(filters)} fallback={<ResultsSkeleton />}>
           <StudioResults filters={filters} isFiltered={isFiltered} />
         </Suspense>
       </section>
