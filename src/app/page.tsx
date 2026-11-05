@@ -303,9 +303,7 @@ export default function HomePage() {
       <section className="mx-auto w-full max-w-[1400px] px-5 py-20 sm:px-8 sm:py-24">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className={tagClass}>
-              Curated selection (MongoDB .limit(6))
-            </p>
+            <p className={tagClass}>Curated selection (limited to 6)</p>
             <h2 className="display mt-4 max-w-[20ch] text-[clamp(2rem,3.6vw,3.25rem)]">
               Featured Creative Workspaces
             </h2>
@@ -357,7 +355,10 @@ export default function HomePage() {
             />
             {steps.map((step) => (
               <li key={step.number} className="relative z-10 h-full">
-                <div className="group flex h-full flex-col rounded-lg border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35">
+                <Link
+                  href="/how-it-works"
+                  className="group flex h-full flex-col rounded-lg border border-border bg-background p-6 transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <span className="flex size-11 items-center justify-center rounded-md bg-brand/10 text-brand transition-colors duration-300 group-hover:bg-brand group-hover:text-brand-foreground">
                       <step.icon className="size-5" />
@@ -366,11 +367,17 @@ export default function HomePage() {
                       {step.number}
                     </span>
                   </div>
-                  <h3 className="mt-6 font-heading text-lg">{step.title}</h3>
+                  <h3 className="mt-6 font-heading text-lg transition-colors duration-300 group-hover:text-brand">
+                    {step.title}
+                  </h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     {step.body}
                   </p>
-                </div>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-[0.68rem] font-medium tracking-[0.16em] text-brand uppercase">
+                    Read the step
+                    <ArrowRightIcon className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
+                </Link>
               </li>
             ))}
           </ol>
@@ -416,19 +423,21 @@ export default function HomePage() {
 
             <ul className="mt-10 grid gap-4 sm:grid-cols-2">
               {guaranteePillars.map((pillar) => (
-                <li
-                  key={pillar.title}
-                  className="flex flex-col gap-3 rounded-lg border border-border bg-card p-5 transition-colors duration-300 hover:border-foreground/35 focus-within:border-foreground/35"
-                >
-                  <span className="flex size-9 items-center justify-center rounded-md bg-brand/10 text-brand">
-                    <pillar.icon className="size-[1.05rem]" />
-                  </span>
-                  <h3 className="font-heading text-base leading-snug">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {pillar.body}
-                  </p>
+                <li key={pillar.title} className="h-full">
+                  <Link
+                    href="/about"
+                    className="group flex h-full flex-col gap-3 rounded-lg border border-border bg-card p-5 transition-colors duration-300 hover:border-foreground/35"
+                  >
+                    <span className="flex size-9 items-center justify-center rounded-md bg-brand/10 text-brand transition-colors duration-300 group-hover:bg-brand group-hover:text-brand-foreground">
+                      <pillar.icon className="size-[1.05rem]" />
+                    </span>
+                    <h3 className="font-heading text-base leading-snug transition-colors duration-300 group-hover:text-brand">
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {pillar.body}
+                    </p>
+                  </Link>
                 </li>
               ))}
             </ul>
