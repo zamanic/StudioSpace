@@ -91,40 +91,41 @@ export function StudioGallery({
           ))}
         </Slider>
 
-        {multiple ? (
-          <p className="absolute bottom-4 left-4 z-10 rounded-full bg-black/55 px-2.5 py-1 text-[0.68rem] font-medium tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm">
-            {active + 1} / {list.length}
-          </p>
-        ) : null}
+        {/* The count sits in the bottom-right corner of the frame so the eye
+            that has just finished reading the picture finds it on the way out.
+            It is shown for a single photo too, where it reads "Photo 1 of 1". */}
+        <p className="absolute right-4 bottom-4 z-10 rounded-full bg-black/55 px-3 py-1 text-[0.68rem] font-medium tracking-[0.14em] text-white/90 uppercase backdrop-blur-sm">
+          Photo {active + 1} of {list.length}
+        </p>
       </div>
 
-      {multiple ? (
-        <div className="grid grid-cols-4 gap-3">
-          {list.map((image, index) => (
-            <button
-              key={`thumb-${image.url}-${index}`}
-              type="button"
-              onClick={() => sliderRef.current?.slickGoTo(index)}
-              aria-label={image.caption || `View image ${index + 1}`}
-              aria-current={index === active}
-              className={cn(
-                "relative aspect-[4/3] overflow-hidden rounded-md bg-muted ring-1 transition-colors",
-                index === active
-                  ? "ring-2 ring-brand"
-                  : "ring-border hover:ring-foreground/40",
-              )}
-            >
-              <Image
-                {...imageProps(image.url)}
-                alt=""
-                fill
-                sizes="15vw"
-                className="object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      ) : null}
+      {/* The thumbnail strip is always present, even for a lone photograph,
+          so the selector never appears and disappears between listings. */}
+      <div className="flex flex-wrap gap-3">
+        {list.map((image, index) => (
+          <button
+            key={`thumb-${image.url}-${index}`}
+            type="button"
+            onClick={() => sliderRef.current?.slickGoTo(index)}
+            aria-label={image.caption || `View image ${index + 1}`}
+            aria-current={index === active}
+            className={cn(
+              "relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-md bg-muted ring-1 transition-all duration-300",
+              index === active
+                ? "ring-2 ring-foreground"
+                : "ring-border opacity-75 hover:opacity-100 hover:ring-foreground/40",
+            )}
+          >
+            <Image
+              {...imageProps(image.url)}
+              alt=""
+              fill
+              sizes="96px"
+              className="object-cover"
+            />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

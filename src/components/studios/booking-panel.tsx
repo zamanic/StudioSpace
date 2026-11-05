@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
+  CalendarCheckIcon,
   CalendarClockIcon,
   ClockIcon,
   PencilIcon,
@@ -25,7 +26,13 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiError, api } from "@/lib/api";
-import { clockTime, currency, hoursBetween, primaryImage, shortDate } from "@/lib/format";
+import {
+  clockTime,
+  currency,
+  hoursBetween,
+  primaryImage,
+  shortDate,
+} from "@/lib/format";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import type { AvailabilitySlot, Studio } from "@/lib/types";
 
@@ -93,7 +100,14 @@ export function BookingPanel({
   }, [hourlyRate, totalHours, securityDeposit, cleaningFee]);
 
   const clashes = form.bookingDate
-    ? availability.filter((slot) => overlaps(slot, form.bookingDate, form.startTime || "00:00", form.endTime || "23:59"))
+    ? availability.filter((slot) =>
+        overlaps(
+          slot,
+          form.bookingDate,
+          form.startTime || "00:00",
+          form.endTime || "23:59",
+        ),
+      )
     : [];
 
   const set = (key: keyof typeof form) => (value: string) =>
@@ -170,7 +184,9 @@ export function BookingPanel({
       router.push("/my-bookings");
     } catch (error) {
       if (error instanceof ApiError && error.code === "DOUBLE_BOOKING") {
-        toast.error("That slot is already taken", { description: error.message });
+        toast.error("That slot is already taken", {
+          description: error.message,
+        });
         setErrors((previous) => ({ ...previous, endTime: error.message }));
       } else if (error instanceof ApiError) {
         toast.error(error.message);
@@ -241,7 +257,8 @@ export function BookingPanel({
             onClick={openDialog}
             aria-haspopup="dialog"
           >
-            {isAuthenticated ? "Book now" : "Sign in to book"}
+            <CalendarCheckIcon />
+            {isAuthenticated ? "Book workspace now" : "Sign in to book"}
           </Button>
         )}
 
@@ -341,7 +358,9 @@ export function BookingPanel({
                 onChange={(event) => set("projectTitle")(event.target.value)}
               />
               {errors.projectTitle ? (
-                <p className="text-xs text-destructive">{errors.projectTitle}</p>
+                <p className="text-xs text-destructive">
+                  {errors.projectTitle}
+                </p>
               ) : null}
             </div>
 

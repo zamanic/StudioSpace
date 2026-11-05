@@ -7,6 +7,7 @@ import {
   ClipboardListIcon,
   MapPinIcon,
   RulerIcon,
+  ShieldCheckIcon,
   SparklesIcon,
   StarIcon,
   UsersIcon,
@@ -17,6 +18,7 @@ import {
 import { cn } from "cn";
 
 import { BookingPanel } from "@/components/studios/booking-panel";
+import { StudioActions } from "@/components/studios/studio-actions";
 import { StudioGallery } from "@/components/studios/studio-gallery";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ApiError, api } from "@/lib/api";
@@ -39,6 +41,17 @@ export async function generateMetadata({ params }: { params: Params }) {
   } catch {
     return { title: "Studio not found" };
   }
+}
+
+/** "450 Production Way, Dhaka, Dhaka Division" - reads like a postal address. */
+function addressLine(studio: Studio) {
+  return [
+    studio.location?.address,
+    studio.location?.city,
+    studio.location?.state,
+  ]
+    .filter(Boolean)
+    .join(", ");
 }
 
 function Spec({
@@ -154,37 +167,45 @@ export default async function StudioDetailPage({ params }: { params: Params }) {
         <span>{studio.category}</span>
       </nav>
 
-      <header className="mt-6 max-w-[52rem]">
-        <p className="text-[0.7rem] font-medium tracking-[0.24em] text-muted-foreground uppercase">
-          {studio.category}
-        </p>
-        <h1 className="display rise mt-4 text-[clamp(2rem,4.4vw,3.6rem)]">
-          {studio.title}
-        </h1>
-        {studio.tagline ? (
-          <p className="rise-2 mt-5 text-[1.02rem] leading-relaxed text-muted-foreground">
-            {studio.tagline}
-          </p>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <MapPinIcon className="size-4" />
-            {studio.location?.city}
-            {studio.location?.state ? `, ${studio.location.state}` : ""}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <UsersIcon className="size-4" />
-            Up to {specs.maxCapacity ?? "-"} people
-          </span>
-          {rating > 0 ? (
-            <span className="inline-flex items-center gap-1.5">
-              <StarIcon className="size-4 fill-current text-brand" />
-              {rating.toFixed(1)}
-              {studio.reviewCount ? ` (${studio.reviewCount})` : ""}
+      <header className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+        <div className="max-w-[52rem]">
+          {/* The category reads as a pill here rather than a bare uppercase
+              line, and the full postal address sits beside it under a pin. */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-[0.68rem] font-medium tracking-[0.14em] uppercase">
+              {studio.category}
             </span>
+            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPinIcon className="size-4 shrink-0" />
+              <span className="truncate">{addressLine(studio)}</span>
+            </span>
+          </div>
+
+          <h1 className="display rise mt-4 text-[clamp(2rem,4.4vw,3.6rem)]">
+            {studio.title}
+          </h1>
+          {studio.tagline ? (
+            <p className="rise-2 mt-5 text-[1.02rem] leading-relaxed text-muted-foreground">
+              {studio.tagline}
+            </p>
           ) : null}
+
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <UsersIcon className="size-4" />
+              Up to {specs.maxCapacity ?? "-"} people
+            </span>
+            {rating > 0 ? (
+              <span className="inline-flex items-center gap-1.5">
+                <StarIcon className="size-4 fill-current text-brand" />
+                {rating.toFixed(1)}
+                {studio.reviewCount ? ` (${studio.reviewCount})` : ""}
+              </span>
+            ) : null}
+          </div>
         </div>
+
+        <StudioActions studioId={studio._id} title={studio.title} />
       </header>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
@@ -298,9 +319,13 @@ export default async function StudioDetailPage({ params }: { params: Params }) {
           ) : null}
 
           <section className="rounded-lg border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-6">
+            <p className="text-[0.68rem] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+              Hosted by
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                <Avatar className="size-12">
+                <Avatar className="size-14">
                   <AvatarImage
                     src={studio.host?.avatar}
                     referrerPolicy="no-referrer"
@@ -310,27 +335,34 @@ export default async function StudioDetailPage({ params }: { params: Params }) {
                     {studio.host?.name?.charAt(0)?.toUpperCase() ?? "H"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="flex items-center gap-1.5 font-heading text-lg">
-                    {studio.host?.name}
-                    {studio.host?.isSuperhost ? (
-                      <BadgeCheckIcon className="size-4 text-brand" />
-                    ) : null}
+                <div className="min-w-0">
+                  <p className="flex flex-wrap items-center gap-2 font-heading text-lg">
+                    Hosted by {studio.host?.name}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[0.68rem] font-medium tracking-[0.06em] text-emerald-700 uppercase dark:text-emerald-400">
+                      <BadgeCheckIcon className="size-3.5" />
+                      Verified Host
+                    </span>
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {studio.host?.responseTime || "Replies within a day"}
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Contact:{" "}
+                    <a
+                      href={`mailto:${studio.host?.email}`}
+                      className="transition-colors hover:text-foreground"
+                    >
+                      {studio.host?.email}
+                    </a>
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {studio.host?.responseTime || "Replies within a day"} ·{" "}
+                    {studio.host?.responseRatePercent ?? 90}% response rate
                   </p>
                 </div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  <span className="font-medium text-foreground">
-                    {studio.host?.responseRatePercent ?? 90}%
-                  </span>{" "}
-                  response rate
-                </p>
-                {studio.host?.phone ? <p>{studio.host.phone}</p> : null}
-              </div>
+
+              <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
+                <ShieldCheckIcon className="size-3.5 shrink-0 text-brand" />
+                Protected by StudioSpace Host Guarantee
+              </span>
             </div>
           </section>
 
