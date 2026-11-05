@@ -131,9 +131,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         });
 
         if (result.error) {
-          toast.error(
-            result.error.message ?? "That did not work. Check your details.",
-          );
+          toast.error("Registration failed", {
+            description:
+              result.error.message ?? "That did not work. Check your details.",
+          });
           return;
         }
 
@@ -141,8 +142,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         // session Better Auth just opened and hand over to /login.
         setHoldRedirect(true);
         await authClient.signOut();
-        toast.success("Account created", {
-          description: "Sign in with the email and password you just chose.",
+        toast.success("Registration successful!", {
+          description: "Please log in with the email and password you chose.",
         });
         router.push(withRedirect("/login"));
         router.refresh();
@@ -155,17 +156,27 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       });
 
       if (result.error) {
-        toast.error(
-          result.error.message ?? "That did not work. Check your details.",
-        );
+        toast.error("Sign-in failed", {
+          description:
+            result.error.message ?? "That did not work. Check your details.",
+        });
         return;
       }
 
-      toast.success("Welcome back", { description: "You are signed in." });
+      // Greet by name when Better Auth hands a user back; fall back to the
+      // email so the toast is never a bare "Welcome back".
+      const signedInName =
+        result.data?.user?.name?.trim() || result.data?.user?.email?.trim();
+      toast.success(
+        signedInName ? `Welcome back, ${signedInName}!` : "Welcome back!",
+        { description: "Logged in successfully." },
+      );
       router.push(redirectTo);
       router.refresh();
     } catch {
-      toast.error("Could not reach the auth service. Please try again.");
+      toast.error("Authentication error", {
+        description: "Could not reach the auth service. Please try again.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -177,7 +188,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       await authClient.signIn.social({ provider, callbackURL: redirectTo });
     } catch {
       setSocialPending(null);
-      toast.error("Could not start that sign-in. Please try again.");
+      toast.error("Authentication error", {
+        description: "Could not start that sign-in. Please try again.",
+      });
     }
   };
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "cn";
+import { toast } from "sonner";
 import {
   ApertureIcon,
   CalendarCheckIcon,
@@ -16,6 +17,7 @@ import {
   PlusIcon,
 } from "lucide-react";
 
+import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -109,7 +111,13 @@ export function Navbar() {
     path === "/" ? pathname === "/" : path ? pathname.startsWith(path) : false;
 
   const handleSignOut = async () => {
+    // Drop the API mutation cookie first so a stale JWT cannot keep writing
+    // after the Better Auth session is gone.
+    await api.clearSessionCookie().catch(() => {});
     await authClient.signOut();
+    toast.success("Logged out successfully", {
+      description: "See you at the next shoot.",
+    });
     setMenuOpen(false);
     router.push("/");
     router.refresh();
