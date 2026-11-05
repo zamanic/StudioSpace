@@ -2,7 +2,7 @@
 
 The name of the project is StudioSpace - A peer-to-peer marketplace where creators book creative production spaces by the hour — photo studios, film stages, sound stages, podcast lounges, music suites and workshops — and where hosts list their own space, manage availability and approve bookings.
 
-**Live site:** client at `https://studio-space-client-lilac.vercel.app`, API at `https://studio-space-server-sepia.vercel.app` · locally the client runs at `http://localhost:3000` and the API at `http://localhost:8000`
+**Live site:** client at `https://studio-space-client-lilac.vercel.app`, API at `https://studio-space-server-sepia.vercel.app` · locally the client runs at `https://studio-space-client-lilac.vercel.app` and the API at `https://studio-space-server-sepia.vercel.app`
 
 ---
 
@@ -44,7 +44,7 @@ Create `.env`:
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mr9tml6.mongodb.net/
 BETTER_AUTH_DB_URL=mongodb+srv://<user>:<password>@cluster0.mr9tml6.mongodb.net/
 PORT=8000
-CLIENT_URL=http://localhost:3000
+CLIENT_URL=https://studio-space-client-lilac.vercel.app
 ```
 
 Load the catalogue, then start the API:
@@ -54,7 +54,7 @@ npm run seed   # imports the official studios.json / bookings.json plus the extr
 npm start      # or: npm run dev  (nodemon)
 ```
 
-The API listens on `http://localhost:8000`.
+The API listens on `https://studio-space-server-sepia.vercel.app`.
 
 ### 2. Client — `StudioSpace-Client`
 
@@ -70,9 +70,9 @@ MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mr9tml6.mongodb.net/
 BETTER_AUTH_DB_URL=mongodb+srv://<user>:<password>@cluster0.mr9tml6.mongodb.net/
 
 BETTER_AUTH_SECRET=replace-with-a-long-random-string
-BETTER_AUTH_URL=http://localhost:3000
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:3000
+BETTER_AUTH_URL=https://studio-space-client-lilac.vercel.app
+NEXT_PUBLIC_APP_URL=https://studio-space-client-lilac.vercel.app
+BETTER_AUTH_TRUSTED_ORIGINS=https://studio-space-client-lilac.vercel.app
 
 # optional — each button only appears when both of its values are set
 BETTER_AUTH_GOOGLE_CLIENT_ID=
@@ -82,13 +82,13 @@ BETTER_AUTH_GITHUB_CLIENT_ID=
 BETTER_AUTH_GITHUB_SECRET=
 NEXT_PUBLIC_AUTH_GITHUB_ENABLED=false
 
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=https://studio-space-server-sepia.vercel.app
 ```
 
 Then:
 
 ```bash
-npm run dev     # http://localhost:3000
+npm run dev     # https://studio-space-client-lilac.vercel.app
 ```
 
 Both processes must be running together: the API verifies tokens by fetching the JWKS from the client at `${CLIENT_URL}/api/auth/jwks`.
