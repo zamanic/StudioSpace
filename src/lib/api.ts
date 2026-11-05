@@ -49,6 +49,7 @@ async function request<T>(
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: cache ?? "no-store",
+    credentials: "include",
   });
 
   const text = await response.text();
@@ -87,6 +88,17 @@ export type StudioFilters = {
 };
 
 export const api = {
+  syncSessionCookie: (token: string) =>
+    request<{ ok: boolean }>("/auth/session-cookie", {
+      method: "POST",
+      token,
+    }),
+
+  clearSessionCookie: () =>
+    request<{ cleared: boolean }>("/auth/session-cookie", {
+      method: "DELETE",
+    }),
+
   getStudios: (filters: StudioFilters = {}) =>
     request<Studio[]>(`/studios${toQuery(filters)}`),
 
@@ -102,51 +114,64 @@ export const api = {
   getAvailability: (studioId: string) =>
     request<AvailabilitySlot[]>(`/bookings/studio/${studioId}`),
 
-  createStudio: (payload: StudioPayload, token: string) =>
-    request<Studio>("/add-studio", { method: "POST", body: payload, token }),
+  createStudio: async (payload: StudioPayload, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<Studio>("/add-studio", { method: "POST", body: payload });
+  },
 
   getMyListings: (token: string) =>
     request<Studio[]>("/my-listings", { token }),
 
-  updateStudio: (id: string, payload: StudioPayload, token: string) =>
-    request<{ modifiedCount: number; studio: Studio }>(`/studios/${id}`, {
+  updateStudio: async (id: string, payload: StudioPayload, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<{ modifiedCount: number; studio: Studio }>(
+      `/studios/${id}`,
+      {
       method: "PATCH",
       body: payload,
-      token,
-    }),
+      },
+    );
+  },
 
-  deleteStudio: (id: string, token: string) =>
-    request<{ deletedCount: number }>(`/studios/${id}`, {
+  deleteStudio: async (id: string, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<{ deletedCount: number }>(`/studios/${id}`, {
       method: "DELETE",
-      token,
-    }),
+    });
+  },
 
-  createBooking: (payload: BookingPayload, token: string) =>
-    request<Booking>("/bookings", { method: "POST", body: payload, token }),
+  createBooking: async (payload: BookingPayload, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<Booking>("/bookings", { method: "POST", body: payload });
+  },
 
   getMyBookings: (token: string) =>
     request<Booking[]>("/my-bookings", { token }),
 
-  cancelBooking: (id: string, token: string) =>
-    request<{ modifiedCount: number; status: string }>(
+  cancelBooking: async (id: string, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<{ modifiedCount: number; status: string }>(
       `/bookings/${id}/cancel`,
-      { method: "PATCH", token },
-    ),
+      { method: "PATCH" },
+    );
+  },
 
   getWishlistIds: (token: string) =>
     request<string[]>("/my-wishlist/ids", { token }),
 
   getMyWishlist: (token: string) => request<Studio[]>("/my-wishlist", { token }),
 
-  saveToWishlist: (studioId: string, token: string) =>
-    request<{ saved: boolean; studioId: string }>(`/wishlist/${studioId}`, {
+  saveToWishlist: async (studioId: string, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<{ saved: boolean; studioId: string }>(`/wishlist/${studioId}`, {
       method: "POST",
-      token,
-    }),
+    });
+  },
 
-  removeFromWishlist: (studioId: string, token: string) =>
-    request<{ saved: boolean; removed: number }>(`/wishlist/${studioId}`, {
+  removeFromWishlist: async (studioId: string, token: string) => {
+    await api.syncSessionCookie(token);
+    return request<{ saved: boolean; removed: number }>(`/wishlist/${studioId}`, {
       method: "DELETE",
-      token,
-    }),
+    });
+  },
 };

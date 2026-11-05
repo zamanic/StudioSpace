@@ -17,6 +17,7 @@ import {
 
 import { TagInput } from "@/components/studios/tag-input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,6 +38,8 @@ type FormState = {
   category: string;
   tagline: string;
   description: string;
+  rating: string;
+  reviewCount: string;
   address: string;
   city: string;
   state: string;
@@ -58,14 +61,29 @@ type FormState = {
   rules: string[];
 };
 
-const amenityPresets = [
-  "High-Speed Wi-Fi",
-  "Climate Control",
-  "Green Room",
-  "Loading Dock",
-  "Parking",
-  "Kitchenette",
-];
+const categoryOptions = [
+  { value: "Photo Studio", label: "Photo Studio" },
+  { value: "Film Stage", label: "Film Stage" },
+  { value: "Sound Stage", label: "Sound Stage" },
+  { value: "Podcast Lounge", label: "Podcast Lounge" },
+  { value: "Music Suite", label: "Music Suite" },
+  { value: "Workshop", label: "Art Workshop" },
+] as const;
+
+const checklistOptions = [
+  { label: "Cyclorama Wall", kind: "amenities" },
+  { label: "Green Screen", kind: "amenities" },
+  { label: "Soundproof Vocal Booth", kind: "amenities" },
+  { label: "Drive-In Loading Bay", kind: "amenities" },
+  { label: "Client Lounge with Espresso Bar", kind: "amenities" },
+  { label: "High-Speed Gigabit WiFi", kind: "amenities" },
+  { label: "Hair & Makeup Station", kind: "amenities" },
+  { label: "Private Dressing Room", kind: "amenities" },
+  { label: "Neve / SSL Preamps", kind: "gear" },
+  { label: "Podcast Mixer & Broadcast Recorder", kind: "gear" },
+  { label: "Aputure / Arri Lighting Kit", kind: "gear" },
+  { label: "Isolation Headphones & Studio Monitors", kind: "gear" },
+] as const;
 
 function toFormState(studio?: Studio): FormState {
   return {
@@ -73,6 +91,10 @@ function toFormState(studio?: Studio): FormState {
     category: String(studio?.category ?? ""),
     tagline: studio?.tagline ?? "",
     description: studio?.description ?? "",
+    rating:
+      studio?.rating !== undefined ? String(studio.rating) : "5",
+    reviewCount:
+      studio?.reviewCount !== undefined ? String(studio.reviewCount) : "0",
     address: studio?.location?.address ?? "",
     city: studio?.location?.city ?? "",
     state: studio?.location?.state ?? "",
@@ -156,13 +178,30 @@ export function StudioForm({
           : previous.images,
     }));
 
+  const toggleChecklist = (
+    item: (typeof checklistOptions)[number],
+    checked: boolean,
+  ) => {
+    const key = item.kind === "gear" ? "includedGear" : "amenities";
+    setForm((previous) => {
+      const current = previous[key];
+      const next = checked
+        ? current.includes(item.label)
+          ? current
+          : [...current, item.label]
+        : current.filter((value) => value !== item.label);
+
+      return { ...previous, [key]: next };
+    });
+  };
+
   const validate = () => {
     const next: Record<string, string> = {};
     if (form.title.trim().length < 4) {
       next.title = "Title must be at least 4 characters.";
     }
     if (!CATEGORIES.includes(form.category as (typeof CATEGORIES)[number])) {
-      next.category = "Pick one of the five categories.";
+      next.category = "Pick a valid studio category.";
     }
     if (form.description.trim().length < 30) {
       next.description = "Detailed overview must be at least 30 characters.";
@@ -174,6 +213,12 @@ export function StudioForm({
     }
     if (!(Number(form.maxCapacity) >= 1)) {
       next.maxCapacity = "Max capacity must be at least 1.";
+    }
+    if (!(Number(form.rating) >= 0 && Number(form.rating) <= 5)) {
+      next.rating = "Client rating must be between 0 and 5.";
+    }
+    if (!(Number(form.reviewCount) >= 0)) {
+      next.reviewCount = "Review count cannot be negative.";
     }
     if (!/^https?:\/\/.+/i.test(form.images[0]?.url?.trim() ?? "")) {
       next.images = "The primary image must be a direct http(s) link.";
@@ -194,6 +239,8 @@ export function StudioForm({
       category: form.category,
       tagline: form.tagline.trim(),
       description: form.description.trim(),
+      rating: Number(form.rating) || 0,
+      reviewCount: Math.max(0, Number(form.reviewCount) || 0),
       location: {
         address: form.address.trim(),
         city: form.city.trim(),
@@ -306,9 +353,9 @@ export function StudioForm({
                     <SelectValue placeholder="Choose a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                    {categoryOptions.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -471,7 +518,7 @@ export function StudioForm({
         <section className={sectionCard}>
           <h2 className={sectionTitle}>
             <RulerIcon className="size-5 text-brand" />
-            Specifications
+            Specifications & card details
           </h2>
           <div className="mt-7 grid gap-6 sm:grid-cols-3">
             <div className="flex flex-col gap-2">
@@ -508,6 +555,34 @@ export function StudioForm({
                 onChange={(event) => set("maxCapacity", event.target.value)}
               />
               {error("maxCapacity")}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="rating">Initial client rating</Label>
+              <Input
+                id="rating"
+                type="number"
+                min={0}
+                max={5}
+                step="0.1"
+                value={form.rating}
+                aria-invalid={Boolean(errors.rating)}
+                placeholder="5.0"
+                onChange={(event) => set("rating", event.target.value)}
+              />
+              {error("rating")}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="reviewCount">Initial review count</Label>
+              <Input
+                id="reviewCount"
+                type="number"
+                min={0}
+                value={form.reviewCount}
+                aria-invalid={Boolean(errors.reviewCount)}
+                placeholder="0"
+                onChange={(event) => set("reviewCount", event.target.value)}
+              />
+              {error("reviewCount")}
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
               <Label htmlFor="power">Power capacity</Label>
@@ -608,23 +683,47 @@ export function StudioForm({
           </h2>
           <div className="mt-7 flex flex-col gap-8">
             <div className="flex flex-col gap-3">
-              <Label>Amenities</Label>
-              {form.amenities.length === 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {amenityPresets.map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() =>
-                        set("amenities", [...form.amenities, preset])
-                      }
-                      className="rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+              <Label>Included amenities &amp; production gear</Label>
+              <div className="grid gap-3 rounded-lg border border-border bg-background/60 p-4 sm:grid-cols-2">
+                {checklistOptions.map((item) => {
+                  const checked =
+                    item.kind === "gear"
+                      ? form.includedGear.includes(item.label)
+                      : form.amenities.includes(item.label);
+
+                  return (
+                    <label
+                      key={item.label}
+                      className="flex items-start gap-3 rounded-md border border-border/70 bg-card px-3 py-3 text-sm transition-colors hover:border-foreground/20"
                     >
-                      + {preset}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(value) =>
+                          toggleChecklist(item, value === true)
+                        }
+                        aria-label={item.label}
+                        className="mt-0.5"
+                      />
+                      <span className="flex flex-col gap-1">
+                        <span>{item.label}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {item.kind === "gear"
+                            ? "Saved under included gear"
+                            : "Saved under amenities"}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Use the checklist for the common studio-ready items, then add
+                anything custom below.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label>Additional amenities</Label>
               <TagInput
                 values={form.amenities}
                 onChange={(values) => set("amenities", values)}
